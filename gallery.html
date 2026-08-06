@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot Folders — Gallery</title>
+    <link rel="stylesheet" href="gallery.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="side-head">
+        <img src="icons/icon32.png" alt="" width="22" height="22" />
+        <h1>Snapshot Folders</h1>
+      </div>
+
+      <div class="new-folder">
+        <input id="newFolderInput" type="text" placeholder="New folder…" maxlength="60" />
+        <button id="createFolderBtn" type="button">+</button>
+      </div>
+
+      <nav id="folderList" class="folder-list" aria-label="Folders"></nav>
+
+      <div class="side-foot" id="accountState">
+        Local only — cloud sync coming soon
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="content-head">
+        <h2 id="folderTitle">All screenshots</h2>
+        <div class="head-actions">
+          <button id="renameBtn" class="ghost" type="button" hidden>Rename</button>
+          <button id="deleteFolderBtn" class="ghost danger" type="button" hidden>
+            Delete folder
+          </button>
+        </div>
+      </header>
+
+      <p id="emptyState" class="empty" hidden>
+        No screenshots here yet. Open the extension popup and capture a tab.
+      </p>
+
+      <section id="grid" class="grid"></section>
+    </main>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" hidden>
+      <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close">
+        ✕
+      </button>
+      <img id="lightboxImg" alt="Screenshot" />
+      <div class="lightbox-meta" id="lightboxMeta"></div>
+    </div>
+
+    <script type="module" src="gallery.js"></script>
+  </body>
+</html>

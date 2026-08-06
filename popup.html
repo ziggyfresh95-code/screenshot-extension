@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot Folders</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <img src="icons/icon32.png" alt="" width="20" height="20" />
+        <span>Snapshot Folders</span>
+      </div>
+      <button id="openGallery" class="link-btn" type="button">Gallery →</button>
+    </header>
+
+    <main>
+      <button id="captureBtn" class="primary" type="button">
+        <span class="camera">📸</span> Capture this tab
+      </button>
+
+      <section class="preview" id="previewWrap" hidden>
+        <img id="previewImg" alt="Screenshot preview" />
+      </section>
+
+      <section class="save-row">
+        <label for="folderSelect">Save to folder</label>
+        <div class="folder-controls">
+          <select id="folderSelect"></select>
+          <button id="newFolderBtn" class="ghost" type="button" title="Create folder">
+            + New
+          </button>
+        </div>
+        <div id="newFolderRow" class="new-folder-row" hidden>
+          <input
+            id="newFolderInput"
+            type="text"
+            placeholder="Folder name"
+            maxlength="60"
+          />
+          <button id="createFolderBtn" class="ghost" type="button">Create</button>
+          <button id="cancelFolderBtn" class="ghost subtle" type="button">
+            Cancel
+          </button>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button id="saveBtn" class="primary" type="button" disabled>
+          Save screenshot
+        </button>
+        <button id="downloadBtn" class="ghost" type="button" disabled>
+          Download
+        </button>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer class="app-footer">
+      <span id="accountState">Local only — cloud sync coming soon</span>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
