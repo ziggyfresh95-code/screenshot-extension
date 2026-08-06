@@ -3,7 +3,14 @@
   "name": "Snapshot Folders",
   "version": "0.1.0",
   "description": "Capture screenshots of the current tab and organize them into folders. Cloud sync via Supabase login coming soon.",
-  "permissions": ["activeTab", "tabs", "storage", "unlimitedStorage", "downloads"],
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "storage",
+    "unlimitedStorage",
+    "downloads"
+  ],
   "action": {
     "default_title": "Snapshot Folders",
     "default_popup": "popup.html",

@@ -8,6 +8,8 @@ and cloud sync** layer is planned next (see [Roadmap](#roadmap)).
 
 - 📸 **One-click capture** of the visible area of the active tab (`Ctrl+Shift+S`
   / `Cmd+Shift+S` opens the popup).
+- ✂️ **Select an area** — drag a rectangle on the page to capture just that
+  region; it's cropped and saved automatically.
 - 🗂️ **Folders** — create, rename, and delete folders to organize captures.
 - 🖼️ **Gallery** — a full-page view to browse folders, preview screenshots in a
   lightbox, move them between folders, download, or delete.
@@ -29,8 +31,11 @@ and cloud sync** layer is planned next (see [Roadmap](#roadmap)).
    `chrome://` and the Web Store cannot be captured).
 2. Click the extension icon (or press `Ctrl+Shift+S` / `Cmd+Shift+S`).
 3. Pick a folder at the top (or click **+ New** to create one).
-4. Click **Capture & Save** — the screenshot is captured **and** saved to
-   that folder in one step. A confirmation and preview appear.
+4. Capture in one of two ways — both save to the chosen folder automatically:
+   - **Capture full tab** — grabs the whole visible page, shows a preview.
+   - **Select area** — the popup closes and the page dims; **drag a rectangle**
+     over the part you want (press `Esc` to cancel). It's cropped and saved,
+     and a green ✓ appears on the toolbar icon to confirm.
 5. Use **Download PNG** to also save a copy to disk, or **Open gallery** to
    browse everything you've captured.
 
@@ -67,6 +72,7 @@ the storage backend is deliberate — the Supabase sync layer will hook in here.
 | Permission         | Why                                                        |
 | ------------------ | --------------------------------------------------------- |
 | `activeTab`/`tabs` | Read the active tab and capture its visible contents      |
+| `scripting`        | Inject the drag-to-select overlay for area capture        |
 | `storage`          | Persist folders and screenshots                           |
 | `unlimitedStorage` | Screenshots are large; avoid the default quota            |
 | `downloads`        | Save a PNG to disk into a per-folder subfolder            |

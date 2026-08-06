@@ -14,6 +14,11 @@
   box-sizing: border-box;
 }
 
+/* [hidden] must beat element display rules (.preview/.actions use flex). */
+[hidden] {
+  display: none !important;
+}
+
 body {
   width: 340px;
   margin: 0;
@@ -80,6 +85,12 @@ button:disabled {
   border: 1px solid var(--gray-300);
   color: var(--gray-900);
   padding: 8px 12px;
+}
+
+.ghost.big {
+  padding: 12px;
+  font-weight: 600;
+  width: 100%;
 }
 
 .ghost:hover:not(:disabled) {

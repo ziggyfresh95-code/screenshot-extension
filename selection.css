@@ -1,0 +1,42 @@
+/* Injected overlay for drag-to-select region capture. IDs are namespaced to
+   avoid clashing with the host page. */
+#__snap_overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  cursor: crosshair;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+#__snap_overlay .__snap_hint {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.92);
+  color: #fff;
+  font: 13px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 7px 14px;
+  border-radius: 8px;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#__snap_rect {
+  position: fixed;
+  border: 2px solid #4f46e5;
+  background: rgba(79, 70, 229, 0.06);
+  /* Dim everything outside the selection with a huge spread shadow. */
+  box-shadow: 0 0 0 100vmax rgba(17, 24, 39, 0.4);
+  pointer-events: none;
+}
+
+/* When no rectangle is drawn yet, dim the whole viewport instead. */
+#__snap_overlay {
+  background: rgba(17, 24, 39, 0.4);
+}
+#__snap_overlay:has(#__snap_rect:not([hidden])) {
+  background: transparent;
+}

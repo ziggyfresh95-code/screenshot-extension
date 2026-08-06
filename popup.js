@@ -9,6 +9,7 @@ import {
 
 const els = {
   capture: document.getElementById('captureBtn'),
+  area: document.getElementById('areaBtn'),
   previewWrap: document.getElementById('previewWrap'),
   previewImg: document.getElementById('previewImg'),
   folderSelect: document.getElementById('folderSelect'),
@@ -83,6 +84,25 @@ async function captureAndSave() {
   }
 }
 
+// Area capture happens in the page + service worker. The popup only kicks it
+// off (passing the target folder) and then closes so the overlay gets focus.
+async function selectArea() {
+  const folderId = els.folderSelect.value;
+  await setLastFolderId(folderId);
+  try {
+    const res = await chrome.runtime.sendMessage({
+      type: 'AREA_CAPTURE',
+      folderId,
+    });
+    if (!res || !res.ok) {
+      throw new Error((res && res.error) || 'Could not start area capture');
+    }
+    window.close(); // get out of the way so the user can drag on the page
+  } catch (err) {
+    setStatus(err.message, 'error');
+  }
+}
+
 function doDownload() {
   if (!lastSaved) return;
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -123,6 +143,7 @@ function openGallery() {
 // ---- wire up ---------------------------------------------------------------
 
 els.capture.addEventListener('click', captureAndSave);
+els.area.addEventListener('click', selectArea);
 els.download.addEventListener('click', doDownload);
 els.gallery.addEventListener('click', openGallery);
 els.openGallery.addEventListener('click', openGallery);
@@ -136,5 +157,8 @@ els.newFolderInput.addEventListener('keydown', (e) => {
 els.folderSelect.addEventListener('change', () =>
   setLastFolderId(els.folderSelect.value)
 );
+
+// Clear the "saved ✓" action badge left by a prior area capture.
+chrome.action.setBadgeText({ text: '' });
 
 refreshFolders();
