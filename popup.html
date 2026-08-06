@@ -16,14 +16,6 @@
     </header>
 
     <main>
-      <button id="captureBtn" class="primary" type="button">
-        <span class="camera">📸</span> Capture this tab
-      </button>
-
-      <section class="preview" id="previewWrap" hidden>
-        <img id="previewImg" alt="Screenshot preview" />
-      </section>
-
       <section class="save-row">
         <label for="folderSelect">Save to folder</label>
         <div class="folder-controls">
@@ -46,16 +38,20 @@
         </div>
       </section>
 
-      <div class="actions">
-        <button id="saveBtn" class="primary" type="button" disabled>
-          Save screenshot
-        </button>
-        <button id="downloadBtn" class="ghost" type="button" disabled>
-          Download
-        </button>
-      </div>
+      <button id="captureBtn" class="primary big" type="button">
+        <span class="camera">📸</span> Capture &amp; Save
+      </button>
 
       <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <section class="preview" id="previewWrap" hidden>
+        <img id="previewImg" alt="Last screenshot preview" />
+      </section>
+
+      <div class="actions" id="postActions" hidden>
+        <button id="galleryBtn" class="ghost" type="button">Open gallery</button>
+        <button id="downloadBtn" class="ghost" type="button">Download PNG</button>
+      </div>
     </main>
 
     <footer class="app-footer">

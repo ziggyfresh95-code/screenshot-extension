@@ -28,10 +28,15 @@ and cloud sync** layer is planned next (see [Roadmap](#roadmap)).
 1. Navigate to any regular web page (browser-internal pages like
    `chrome://` and the Web Store cannot be captured).
 2. Click the extension icon (or press `Ctrl+Shift+S` / `Cmd+Shift+S`).
-3. Click **Capture this tab** — a preview appears.
-4. Pick a folder (or click **+ New** to create one) and press
-   **Save screenshot**. Use **Download** to also save a PNG to disk.
-5. Click **Gallery →** to browse everything you've captured.
+3. Pick a folder at the top (or click **+ New** to create one).
+4. Click **Capture & Save** — the screenshot is captured **and** saved to
+   that folder in one step. A confirmation and preview appear.
+5. Use **Download PNG** to also save a copy to disk, or **Open gallery** to
+   browse everything you've captured.
+
+The **gallery** opens as its own browser tab. It's the full view of your
+folders and screenshots — click a thumbnail to enlarge it (press `Esc` or the
+✕ to close the preview), and close the tab like any other when you're done.
 
 ## Project structure
 
