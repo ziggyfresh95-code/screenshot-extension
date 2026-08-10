@@ -20,8 +20,9 @@
 
       <nav id="folderList" class="folder-list" aria-label="Folders"></nav>
 
-      <div class="side-foot" id="accountState">
-        Local only — cloud sync coming soon
+      <div class="side-foot">
+        <div id="accountEmail" class="account-email"></div>
+        <button id="signOutBtn" class="link-btn" type="button" hidden>Sign out</button>
       </div>
     </aside>
 
@@ -50,6 +51,11 @@
       </button>
       <img id="lightboxImg" alt="Screenshot" />
       <div class="lightbox-meta" id="lightboxMeta"></div>
+    </div>
+
+    <!-- Full-page auth gate, shown when signed out. -->
+    <div id="authGate" class="auth-gate" hidden>
+      <div id="authRoot" class="auth-root"></div>
     </div>
 
     <script type="module" src="gallery.js"></script>

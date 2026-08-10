@@ -318,3 +318,154 @@ body {
 .lightbox-meta a {
   color: #c7d2fe;
 }
+
+/* ---- Auth gate ---- */
+.side-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.account-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gray-600);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--indigo);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+.auth-gate {
+  position: fixed;
+  inset: 0;
+  background: var(--gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.auth-root {
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--gray-100);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 10px 40px rgba(17, 24, 39, 0.08);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.auth-sub {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.auth-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.auth-input {
+  padding: 10px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.auth-input:focus {
+  outline: 2px solid var(--indigo-50);
+  border-color: var(--indigo);
+}
+
+.auth-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.auth-btn {
+  margin-top: 6px;
+  background: var(--indigo);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background: var(--indigo-600);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-toggle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.auth-toggle a,
+.auth-reconfig a {
+  color: var(--indigo);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-toggle a:hover,
+.auth-reconfig a:hover {
+  text-decoration: underline;
+}
+
+.auth-error {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--red);
+  min-height: 16px;
+}
+
+.auth-note {
+  margin: 0;
+  font-size: 13px;
+  color: #059669;
+}
+
+.auth-reconfig {
+  margin: 10px 0 0;
+  font-size: 12px;
+}

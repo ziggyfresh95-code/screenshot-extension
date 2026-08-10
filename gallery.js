@@ -9,6 +9,8 @@ import {
   moveScreenshot,
   deleteScreenshot,
 } from './lib/storage.js';
+import { getUser, signOut } from './lib/auth.js';
+import { mountAuth } from './lib/authview.js';
 
 const els = {
   folderList: document.getElementById('folderList'),
@@ -23,6 +25,10 @@ const els = {
   lightboxImg: document.getElementById('lightboxImg'),
   lightboxMeta: document.getElementById('lightboxMeta'),
   lightboxClose: document.getElementById('lightboxClose'),
+  authGate: document.getElementById('authGate'),
+  authRoot: document.getElementById('authRoot'),
+  accountEmail: document.getElementById('accountEmail'),
+  signOut: document.getElementById('signOutBtn'),
 };
 
 // null == the "All screenshots" view.
@@ -244,11 +250,49 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !els.lightbox.hidden) closeLightbox();
 });
 
+els.signOut.addEventListener('click', async () => {
+  await signOut();
+  showSignedOut();
+});
+
 // Re-render if screenshots are added from the popup while this tab is open.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && (changes.screenshots || changes.folders)) {
+  if (area !== 'local') return;
+  // If the session was cleared elsewhere (e.g. signed out in the popup), gate.
+  if (changes.supabaseSession && !changes.supabaseSession.newValue) {
+    showSignedOut();
+    return;
+  }
+  if (changes.screenshots || changes.folders) {
     renderSidebar().then(renderGrid);
   }
 });
 
-selectFolder(null);
+// ---- auth gate -------------------------------------------------------------
+
+function showSignedOut() {
+  els.authGate.hidden = false;
+  els.signOut.hidden = true;
+  els.accountEmail.textContent = '';
+  mountAuth(els.authRoot, showSignedIn);
+}
+
+async function showSignedIn() {
+  els.authGate.hidden = true;
+  els.authRoot.innerHTML = '';
+  els.signOut.hidden = false;
+  const user = await getUser();
+  els.accountEmail.textContent = user?.email || '';
+  await selectFolder(null);
+}
+
+async function init() {
+  const user = await getUser();
+  if (user) {
+    await showSignedIn();
+  } else {
+    showSignedOut();
+  }
+}
+
+init();

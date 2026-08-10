@@ -6,8 +6,15 @@ import {
   getLastFolderId,
   setLastFolderId,
 } from './lib/storage.js';
+import { getUser, signOut } from './lib/auth.js';
+import { mountAuth } from './lib/authview.js';
 
 const els = {
+  authRoot: document.getElementById('authRoot'),
+  appMain: document.getElementById('appMain'),
+  openGalleryTop: document.getElementById('openGallery'),
+  accountEmail: document.getElementById('accountEmail'),
+  signOut: document.getElementById('signOutBtn'),
   capture: document.getElementById('captureBtn'),
   area: document.getElementById('areaBtn'),
   previewWrap: document.getElementById('previewWrap'),
@@ -157,8 +164,42 @@ els.newFolderInput.addEventListener('keydown', (e) => {
 els.folderSelect.addEventListener('change', () =>
   setLastFolderId(els.folderSelect.value)
 );
+els.signOut.addEventListener('click', async () => {
+  await signOut();
+  showSignedOut();
+});
 
-// Clear the "saved ✓" action badge left by a prior area capture.
-chrome.action.setBadgeText({ text: '' });
+// ---- auth gate -------------------------------------------------------------
 
-refreshFolders();
+function showSignedOut() {
+  els.appMain.hidden = true;
+  els.openGalleryTop.hidden = true;
+  els.signOut.hidden = true;
+  els.accountEmail.textContent = '';
+  els.authRoot.hidden = false;
+  mountAuth(els.authRoot, showSignedIn);
+}
+
+async function showSignedIn() {
+  els.authRoot.hidden = true;
+  els.authRoot.innerHTML = '';
+  els.appMain.hidden = false;
+  els.openGalleryTop.hidden = false;
+  els.signOut.hidden = false;
+  const user = await getUser();
+  els.accountEmail.textContent = user?.email || '';
+  await refreshFolders();
+}
+
+async function init() {
+  // Clear the "saved ✓" action badge left by a prior area capture.
+  chrome.action.setBadgeText({ text: '' });
+  const user = await getUser();
+  if (user) {
+    await showSignedIn();
+  } else {
+    showSignedOut();
+  }
+}
+
+init();

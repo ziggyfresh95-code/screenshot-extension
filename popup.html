@@ -12,10 +12,14 @@
         <img src="icons/icon32.png" alt="" width="20" height="20" />
         <span>Snapshot Folders</span>
       </div>
-      <button id="openGallery" class="link-btn" type="button">Gallery →</button>
+      <button id="openGallery" class="link-btn" type="button" hidden>Gallery →</button>
     </header>
 
-    <main>
+    <!-- Shown while signed out (setup / sign-in / sign-up). -->
+    <div id="authRoot" class="auth-root"></div>
+
+    <!-- Shown once signed in. -->
+    <main id="appMain" hidden>
       <section class="save-row">
         <label for="folderSelect">Save to folder</label>
         <div class="folder-controls">
@@ -59,7 +63,8 @@
     </main>
 
     <footer class="app-footer">
-      <span id="accountState">Local only — cloud sync coming soon</span>
+      <span id="accountEmail" class="account-email"></span>
+      <button id="signOutBtn" class="link-btn" type="button" hidden>Sign out</button>
     </footer>
 
     <script type="module" src="popup.js"></script>

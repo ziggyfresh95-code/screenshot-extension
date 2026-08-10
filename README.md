@@ -17,6 +17,29 @@ and cloud sync** layer is planned next (see [Roadmap](#roadmap)).
 - 🔒 Works fully offline; captures never leave your machine (until cloud sync
   is added).
 
+## Sign in (Supabase)
+
+The extension is gated behind a Supabase login — you must sign in (or sign up)
+before capturing. On first launch you'll see a one-time **Setup** screen:
+
+1. In your [Supabase dashboard](https://supabase.com/dashboard), open
+   **Project Settings → API**.
+2. Copy the **Project URL** and the **`anon` `public`** key.
+3. Paste both into the extension's Setup screen and click **Save & continue**.
+   - The values are stored locally in `chrome.storage.local` — not in the code
+     or git.
+   - The **anon key is safe to embed** in a client; access is enforced by
+     Supabase Row Level Security. **Never** use the `service_role` secret key.
+4. Create an account or sign in with **email + password**.
+
+> If **Authentication → Providers → Email → Confirm email** is ON in Supabase,
+> new sign-ups must click the confirmation link in their email before their
+> first sign-in. If it's OFF, sign-up logs you straight in.
+
+You can change the Supabase details later via **“Change Supabase settings”** on
+the sign-in screen, and **Sign out** from the popup footer or the gallery
+sidebar.
+
 ## Install (unpacked, for development)
 
 1. Open `chrome://extensions` in Chrome.
@@ -50,9 +73,13 @@ manifest.json      Manifest V3 config (permissions, action, service worker)
 background.js      Service worker — performs chrome.tabs.captureVisibleTab
 popup.html/.css/.js  Toolbar popup: capture, choose folder, save/download
 gallery.html/.css/.js  Full-page browser for folders & screenshots
+selection.js/.css  Injected drag-to-select overlay for area capture
 lib/storage.js     Data-access layer (folders + screenshots) — the single
                    place that talks to storage, so a Supabase backend can be
                    dropped in without touching the UI
+lib/config.js      Supabase connection settings (URL + anon key)
+lib/auth.js        Fetch-based Supabase Auth (GoTrue) client + session mgmt
+lib/authview.js    Shared setup / sign-in / sign-up UI
 icons/             Extension icons (16/32/48/128)
 ```
 
@@ -76,15 +103,19 @@ the storage backend is deliberate — the Supabase sync layer will hook in here.
 | `storage`          | Persist folders and screenshots                           |
 | `unlimitedStorage` | Screenshots are large; avoid the default quota            |
 | `downloads`        | Save a PNG to disk into a per-folder subfolder            |
+| `host_permissions` | `https://*.supabase.co/*` — talk to Supabase Auth         |
 
 ## Roadmap
 
 - [x] Screenshot capture of the current tab
 - [x] Create / rename / delete folders
 - [x] Gallery with preview, move, download, delete
-- [ ] **Supabase login (email/password + OAuth)**
+- [x] **Supabase login** (email/password) gating the whole extension
+- [ ] OAuth providers (e.g. Google) — needs a stable extension ID
 - [ ] **Cloud sync** of folders and screenshots via `lib/storage.js`
 - [ ] Cross-device access to your saved captures
 
-> The storage layer is already isolated so the login + sync work slots in
-> behind it without a UI rewrite.
+> The storage layer is already isolated so the sync work slots in behind it
+> without a UI rewrite. Auth lives in `lib/auth.js` (a small fetch-based
+> GoTrue client), `lib/config.js` (connection settings), and `lib/authview.js`
+> (the shared sign-in / setup UI).
