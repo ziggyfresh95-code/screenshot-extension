@@ -68,7 +68,7 @@ async function finishAreaCapture(rect, dpr, sender) {
     sourceUrl: sender?.tab?.url || '',
     title: sender?.tab?.title || '',
   });
-  await setLastFolderId(shot.folderId);
+  await setLastFolderId(shot.folder_id);
   await flashBadge('✓', '#059669');
 }
 

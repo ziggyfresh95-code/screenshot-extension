@@ -77,7 +77,7 @@ async function captureAndSave() {
       sourceUrl: res.sourceUrl,
       title: res.title,
     });
-    await setLastFolderId(shot.folderId);
+    await setLastFolderId(shot.folder_id);
 
     lastSaved = { dataUrl: res.dataUrl };
     els.previewImg.src = res.dataUrl;

@@ -14,16 +14,34 @@ and cloud sync** layer is planned next (see [Roadmap](#roadmap)).
 - 🖼️ **Gallery** — a full-page view to browse folders, preview screenshots in a
   lightbox, move them between folders, download, or delete.
 - 💾 **Download to disk** into a subfolder named after the folder.
-- 🔒 Works fully offline; captures never leave your machine (until cloud sync
-  is added).
+- ☁️ **Per-user cloud storage** — folders and screenshots are saved to your
+  Supabase project and are private to each signed-in user (enforced by Row
+  Level Security), so your captures follow you across devices.
 
 ## Sign in (Supabase)
 
 The extension is gated behind a Supabase login — you must sign in (or sign up)
-before capturing. On first launch you'll see a one-time **Setup** screen:
+before capturing. Captures are then stored per-user in your Supabase database.
+
+### One-time database setup
+
+Create the tables the extension uses (run once):
 
 1. In your [Supabase dashboard](https://supabase.com/dashboard), open
-   **Project Settings → API**.
+   **SQL Editor → New query**.
+2. Paste the contents of [`supabase_schema.sql`](./supabase_schema.sql) and
+   click **Run**.
+
+This creates two tables — `chrome_snapshot_folders` and
+`chrome_snapshot_screenshots` — prefixed so they don't collide with the other
+project sharing this database, with Row Level Security so each user only sees
+their own rows.
+
+### Connect the extension
+
+On first launch you'll see a one-time **Setup** screen:
+
+1. In your Supabase dashboard, open **Project Settings → API**.
 2. Copy the **Project URL** and the **`anon` `public`** key.
 3. Paste both into the extension's Setup screen and click **Save & continue**.
    - The values are stored locally in `chrome.storage.local` — not in the code
@@ -85,14 +103,18 @@ icons/             Extension icons (16/32/48/128)
 
 ### Data model
 
-Stored in `chrome.storage.local` (the `unlimitedStorage` permission is
-requested so large PNGs fit):
+Folders and screenshots are stored in Supabase, one private dataset per user
+(see [`supabase_schema.sql`](./supabase_schema.sql)):
 
-- **folders**: `{ id, name, createdAt }`
-- **screenshots**: `{ id, folderId, name, dataUrl, sourceUrl, title, createdAt }`
+- **chrome_snapshot_folders**: `id, user_id, name, created_at`
+- **chrome_snapshot_screenshots**:
+  `id, user_id, folder_id, name, image (base64 data URL), source_url, title, created_at`
 
-All persistence goes through `lib/storage.js`. Keeping the UI decoupled from
-the storage backend is deliberate — the Supabase sync layer will hook in here.
+All persistence goes through `lib/storage.js`, which talks to Supabase via
+`lib/db.js` (a small PostgREST client). List queries fetch metadata only; each
+image is loaded on demand (lazily as thumbnails scroll into view, or when a
+screenshot is opened/downloaded) to keep things fast. The last-used folder is
+the only thing kept locally, in `chrome.storage.local`.
 
 ## Permissions rationale
 
@@ -111,11 +133,12 @@ the storage backend is deliberate — the Supabase sync layer will hook in here.
 - [x] Create / rename / delete folders
 - [x] Gallery with preview, move, download, delete
 - [x] **Supabase login** (email/password) gating the whole extension
+- [x] **Per-user cloud storage** of folders and screenshots (RLS-protected)
 - [ ] OAuth providers (e.g. Google) — needs a stable extension ID
-- [ ] **Cloud sync** of folders and screenshots via `lib/storage.js`
-- [ ] Cross-device access to your saved captures
+- [ ] Move image bytes to Supabase Storage (vs. base64 in a column) for scale
+- [ ] Thumbnail column so grids load without fetching full images
 
-> The storage layer is already isolated so the sync work slots in behind it
-> without a UI rewrite. Auth lives in `lib/auth.js` (a small fetch-based
-> GoTrue client), `lib/config.js` (connection settings), and `lib/authview.js`
-> (the shared sign-in / setup UI).
+> Auth lives in `lib/auth.js` (a small fetch-based GoTrue client),
+> `lib/config.js` (connection settings), and `lib/authview.js` (the shared
+> sign-in / setup UI). Data access is in `lib/storage.js` over `lib/db.js`
+> (PostgREST).

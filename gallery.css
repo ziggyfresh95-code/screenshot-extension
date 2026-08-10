@@ -223,6 +223,12 @@ body {
   display: block;
 }
 
+/* Thumbnails start empty and fill in when their image loads. */
+.card-thumb img:not([src]),
+.card-thumb img.broken {
+  opacity: 0;
+}
+
 .card-body {
   padding: 10px 12px;
   display: flex;

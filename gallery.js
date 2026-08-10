@@ -5,6 +5,7 @@ import {
   renameFolder,
   deleteFolder,
   getScreenshots,
+  getScreenshotImage,
   countByFolder,
   moveScreenshot,
   deleteScreenshot,
@@ -38,6 +39,34 @@ let folders = [];
 function fmtDate(ts) {
   return new Date(ts).toLocaleString();
 }
+
+// In-memory cache of fetched images so re-opening the lightbox / re-rendering
+// doesn't re-download the same base64 blob.
+const imageCache = new Map();
+async function loadImage(id) {
+  if (imageCache.has(id)) return imageCache.get(id);
+  const data = await getScreenshotImage(id);
+  imageCache.set(id, data);
+  return data;
+}
+
+// Lazily fetch each thumbnail's image only when it scrolls into view.
+const thumbObserver = new IntersectionObserver(
+  (entries, obs) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const img = entry.target;
+      obs.unobserve(img);
+      loadImage(img.dataset.shotId)
+        .then((data) => {
+          if (data) img.src = data;
+          else img.classList.add('broken');
+        })
+        .catch(() => img.classList.add('broken'));
+    }
+  },
+  { rootMargin: '200px' }
+);
 
 async function renderSidebar() {
   folders = await getFolders();
@@ -97,10 +126,10 @@ function card(shot) {
   const thumb = document.createElement('div');
   thumb.className = 'card-thumb';
   const img = document.createElement('img');
-  img.src = shot.dataUrl;
   img.alt = shot.name;
-  img.loading = 'lazy';
+  img.dataset.shotId = shot.id;
   thumb.appendChild(img);
+  thumbObserver.observe(img); // image loads when scrolled into view
   thumb.addEventListener('click', () => openLightbox(shot));
 
   const body = document.createElement('div');
@@ -112,7 +141,7 @@ function card(shot) {
 
   const meta = document.createElement('div');
   meta.className = 'card-meta';
-  meta.textContent = fmtDate(shot.createdAt);
+  meta.textContent = fmtDate(shot.created_at);
 
   const actions = document.createElement('div');
   actions.className = 'card-actions';
@@ -128,7 +157,7 @@ function card(shot) {
   head.value = '';
   move.appendChild(head);
   for (const f of folders) {
-    if (f.id === shot.folderId) continue;
+    if (f.id === shot.folder_id) continue;
     const opt = document.createElement('option');
     opt.value = f.id;
     opt.textContent = f.name;
@@ -157,35 +186,39 @@ function card(shot) {
   return el;
 }
 
-function download(shot) {
-  const folder = folders.find((f) => f.id === shot.folderId);
+async function download(shot) {
+  const folder = folders.find((f) => f.id === shot.folder_id);
   const safeFolder = (folder ? folder.name : 'Snapshots').replace(
     /[^a-z0-9_-]+/gi,
     '-'
   );
   const safeName = shot.name.replace(/[^a-z0-9_-]+/gi, '-');
+  const data = await loadImage(shot.id);
+  if (!data) return;
   chrome.downloads.download({
-    url: shot.dataUrl,
+    url: data,
     filename: `${safeFolder}/${safeName}.png`,
     saveAs: false,
   });
 }
 
-function openLightbox(shot) {
-  els.lightboxImg.src = shot.dataUrl;
+async function openLightbox(shot) {
+  els.lightboxImg.removeAttribute('src');
   els.lightboxMeta.innerHTML = '';
   const line = document.createElement('div');
-  line.textContent = `${shot.name} · ${fmtDate(shot.createdAt)}`;
+  line.textContent = `${shot.name} · ${fmtDate(shot.created_at)}`;
   els.lightboxMeta.appendChild(line);
-  if (shot.sourceUrl) {
+  if (shot.source_url) {
     const a = document.createElement('a');
-    a.href = shot.sourceUrl;
-    a.textContent = shot.sourceUrl;
+    a.href = shot.source_url;
+    a.textContent = shot.source_url;
     a.target = '_blank';
     a.rel = 'noreferrer';
     els.lightboxMeta.appendChild(a);
   }
   els.lightbox.hidden = false;
+  const data = await loadImage(shot.id);
+  if (data) els.lightboxImg.src = data;
 }
 
 function closeLightbox() {
@@ -255,15 +288,19 @@ els.signOut.addEventListener('click', async () => {
   showSignedOut();
 });
 
-// Re-render if screenshots are added from the popup while this tab is open.
+// If the session is cleared elsewhere (e.g. signed out in the popup), gate.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
-  // If the session was cleared elsewhere (e.g. signed out in the popup), gate.
   if (changes.supabaseSession && !changes.supabaseSession.newValue) {
     showSignedOut();
-    return;
   }
-  if (changes.screenshots || changes.folders) {
+});
+
+// Data lives in Supabase now, so refresh when returning to this tab (e.g.
+// after capturing from the popup) to pull in anything new. Only when signed in
+// (the auth gate is hidden).
+window.addEventListener('focus', () => {
+  if (els.authGate.hidden) {
     renderSidebar().then(renderGrid);
   }
 });
