@@ -58,6 +58,66 @@ You can change the Supabase details later via **“Change Supabase settings”**
 the sign-in screen, and **Sign out** from the popup footer or the gallery
 sidebar.
 
+## Paywall (Stripe subscription — $7/month)
+
+After signing in, users without an active subscription see a paywall and must
+subscribe before capturing. Stripe's secret key and payment verification run in
+two Supabase Edge Functions — never in the extension.
+
+### A. Stripe dashboard (test mode)
+
+1. In [Stripe](https://dashboard.stripe.com/test) make sure **Test mode** is on.
+2. **Products → Add product**: name it (e.g. “Snapshot Folders Pro”), add a
+   **recurring** price of **$7 / month**. Save, then copy the **Price ID**
+   (`price_...`).
+3. **Developers → API keys**: copy the **Secret key** (`sk_test_...`).
+
+### B. Database
+
+Run [`stripe_schema.sql`](./stripe_schema.sql) in Supabase → SQL Editor (creates
+`chrome_snapshot_subscriptions`, read-only to users).
+
+### C. Deploy the Edge Functions (Supabase CLI)
+
+```bash
+# one-time
+npm i -g supabase
+supabase login
+supabase link --project-ref <your-project-ref>   # from your Supabase URL
+
+# from the repo root (this folder):
+supabase functions deploy create-checkout-session
+supabase functions deploy stripe-webhook --no-verify-jwt   # Stripe must reach it
+
+# set the secrets the functions need
+supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx
+supabase secrets set STRIPE_PRICE_ID=price_xxx
+```
+
+### D. Connect the Stripe webhook
+
+1. Stripe **Developers → Webhooks → Add endpoint**.
+2. Endpoint URL:
+   `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`
+3. Select events: `checkout.session.completed`,
+   `customer.subscription.updated`, `customer.subscription.deleted`.
+4. Copy the endpoint’s **Signing secret** (`whsec_...`) and set it:
+   ```bash
+   supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
+   ```
+
+### E. Test
+
+1. Reload the extension, sign in → the **paywall** appears.
+2. **Subscribe with Stripe** → pay on the Stripe page with test card
+   `4242 4242 4242 4242`, any future expiry, any CVC/ZIP.
+3. The webhook records the subscription; the extension polls and unlocks.
+4. Verify in Supabase → **Table Editor → chrome_snapshot_subscriptions**
+   (`status = active`).
+
+> Until you optionally enable the server-side RLS block at the bottom of
+> `stripe_schema.sql`, the paywall is enforced in the extension UI only.
+
 ## Install (unpacked, for development)
 
 1. Open `chrome://extensions` in Chrome.
@@ -134,6 +194,7 @@ the only thing kept locally, in `chrome.storage.local`.
 - [x] Gallery with preview, move, download, delete
 - [x] **Supabase login** (email/password) gating the whole extension
 - [x] **Per-user cloud storage** of folders and screenshots (RLS-protected)
+- [x] **Stripe subscription paywall** ($7/month) via Supabase Edge Functions
 - [ ] OAuth providers (e.g. Google) — needs a stable extension ID
 - [ ] Move image bytes to Supabase Storage (vs. base64 in a column) for scale
 - [ ] Thumbnail column so grids load without fetching full images

@@ -12,6 +12,8 @@ import {
 } from './lib/storage.js';
 import { getUser, signOut } from './lib/auth.js';
 import { mountAuth } from './lib/authview.js';
+import { isSubscribed } from './lib/billing.js';
+import { mountPaywall } from './lib/paywall.js';
 
 const els = {
   folderList: document.getElementById('folderList'),
@@ -305,20 +307,44 @@ window.addEventListener('focus', () => {
   }
 });
 
-// ---- auth gate -------------------------------------------------------------
+// ---- gate: signed out -> auth, signed in but unpaid -> paywall, else app ----
 
 function showSignedOut() {
   els.authGate.hidden = false;
   els.signOut.hidden = true;
   els.accountEmail.textContent = '';
-  mountAuth(els.authRoot, showSignedIn);
+  mountAuth(els.authRoot, afterAuth);
 }
 
-async function showSignedIn() {
+async function afterAuth() {
+  const user = await getUser();
+  let subscribed = false;
+  try {
+    subscribed = await isSubscribed();
+  } catch (_) {
+    subscribed = false;
+  }
+  if (subscribed) {
+    await showApp(user);
+  } else {
+    els.authGate.hidden = false;
+    els.signOut.hidden = true;
+    els.accountEmail.textContent = '';
+    mountPaywall(els.authRoot, {
+      user,
+      onActive: () => showApp(user),
+      onSignOut: async () => {
+        await signOut();
+        showSignedOut();
+      },
+    });
+  }
+}
+
+async function showApp(user) {
   els.authGate.hidden = true;
   els.authRoot.innerHTML = '';
   els.signOut.hidden = false;
-  const user = await getUser();
   els.accountEmail.textContent = user?.email || '';
   await selectFolder(null);
 }
@@ -326,7 +352,7 @@ async function showSignedIn() {
 async function init() {
   const user = await getUser();
   if (user) {
-    await showSignedIn();
+    await afterAuth();
   } else {
     showSignedOut();
   }

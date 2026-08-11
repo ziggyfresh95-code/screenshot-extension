@@ -8,6 +8,8 @@ import {
 } from './lib/storage.js';
 import { getUser, signOut } from './lib/auth.js';
 import { mountAuth } from './lib/authview.js';
+import { isSubscribed } from './lib/billing.js';
+import { mountPaywall } from './lib/paywall.js';
 
 const els = {
   authRoot: document.getElementById('authRoot'),
@@ -169,7 +171,7 @@ els.signOut.addEventListener('click', async () => {
   showSignedOut();
 });
 
-// ---- auth gate -------------------------------------------------------------
+// ---- gate: signed out -> auth, signed in but unpaid -> paywall, else app ----
 
 function showSignedOut() {
   els.appMain.hidden = true;
@@ -177,16 +179,43 @@ function showSignedOut() {
   els.signOut.hidden = true;
   els.accountEmail.textContent = '';
   els.authRoot.hidden = false;
-  mountAuth(els.authRoot, showSignedIn);
+  mountAuth(els.authRoot, afterAuth);
 }
 
-async function showSignedIn() {
+// After sign-in, decide between paywall and the app based on subscription.
+async function afterAuth() {
+  els.appMain.hidden = true;
+  const user = await getUser();
+  let subscribed = false;
+  try {
+    subscribed = await isSubscribed();
+  } catch (_) {
+    subscribed = false;
+  }
+  if (subscribed) {
+    await showApp(user);
+  } else {
+    els.signOut.hidden = true;
+    els.openGalleryTop.hidden = true;
+    els.accountEmail.textContent = '';
+    els.authRoot.hidden = false;
+    mountPaywall(els.authRoot, {
+      user,
+      onActive: () => showApp(user),
+      onSignOut: async () => {
+        await signOut();
+        showSignedOut();
+      },
+    });
+  }
+}
+
+async function showApp(user) {
   els.authRoot.hidden = true;
   els.authRoot.innerHTML = '';
   els.appMain.hidden = false;
   els.openGalleryTop.hidden = false;
   els.signOut.hidden = false;
-  const user = await getUser();
   els.accountEmail.textContent = user?.email || '';
   await refreshFolders();
 }
@@ -196,7 +225,7 @@ async function init() {
   chrome.action.setBadgeText({ text: '' });
   const user = await getUser();
   if (user) {
-    await showSignedIn();
+    await afterAuth();
   } else {
     showSignedOut();
   }

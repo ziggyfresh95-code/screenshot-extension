@@ -323,3 +323,150 @@ select {
   margin: 8px 0 0;
   font-size: 11px;
 }
+
+/* ---- Paywall (shared class names with gallery.css) ---- */
+.pw-card {
+  padding: 16px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.pw-badge {
+  align-self: center;
+  background: var(--indigo-50);
+  color: var(--indigo-600);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.pw-title {
+  margin: 4px 0 0;
+  font-size: 18px;
+}
+
+.pw-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+.pw-price {
+  margin: 6px 0;
+}
+
+.pw-amount {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.pw-period {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.pw-features {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.pw-features li {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  align-items: flex-start;
+}
+
+.pw-check {
+  color: #fff;
+  background: var(--green);
+  border-radius: 999px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+.pw-btn {
+  margin-top: 6px;
+  background: var(--indigo);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pw-btn:hover:not(:disabled) {
+  background: var(--indigo-600);
+}
+
+.pw-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pw-refresh {
+  background: none;
+  border: none;
+  color: var(--indigo);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pw-refresh:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.pw-error {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--red);
+  min-height: 14px;
+}
+
+.pw-foot {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pw-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pw-foot a {
+  color: var(--indigo);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pw-foot a:hover {
+  text-decoration: underline;
+}
