@@ -39,16 +39,16 @@ their own rows.
 
 ### Connect the extension
 
-On first launch you'll see a one-time **Setup** screen:
+The Supabase **Project URL** and **anon public key** are baked into
+`lib/config.js`, so users go straight to **Sign in** — no setup step. The anon
+key is meant to ship in client apps; Row Level Security protects the data.
+**Never** put the `service_role` secret key there.
 
-1. In your Supabase dashboard, open **Project Settings → API**.
-2. Copy the **Project URL** and the **`anon` `public`** key.
-3. Paste both into the extension's Setup screen and click **Save & continue**.
-   - The values are stored locally in `chrome.storage.local` — not in the code
-     or git.
-   - The **anon key is safe to embed** in a client; access is enforced by
-     Supabase Row Level Security. **Never** use the `service_role` secret key.
-4. Create an account or sign in with **email + password**.
+To point the extension at a different Supabase project, edit the `BAKED` values
+in `lib/config.js`. (If they're left blank, a one-time in-app Setup screen
+appears as a fallback and stores the values in `chrome.storage.local`.)
+
+Then just **create an account or sign in** with email + password.
 
 > If **Authentication → Providers → Email → Confirm email** is ON in Supabase,
 > new sign-ups must click the confirmation link in their email before their
