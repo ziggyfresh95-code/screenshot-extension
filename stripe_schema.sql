@@ -12,8 +12,19 @@ create table if not exists public.chrome_snapshot_subscriptions (
   status                 text not null default 'inactive',
   price_id               text,
   current_period_end     timestamptz,
+  cancel_at_period_end   boolean not null default false,
+  cancellation_feedback  text,   -- Stripe dropdown reason (too_expensive, ...)
+  cancellation_comment   text,   -- free-text the customer typed
+  cancellation_reason    text,   -- e.g. cancellation_requested
   updated_at             timestamptz not null default now()
 );
+
+-- Add the newer columns to an already-existing table (safe to re-run).
+alter table public.chrome_snapshot_subscriptions
+  add column if not exists cancel_at_period_end  boolean not null default false,
+  add column if not exists cancellation_feedback text,
+  add column if not exists cancellation_comment  text,
+  add column if not exists cancellation_reason   text;
 
 alter table public.chrome_snapshot_subscriptions enable row level security;
 

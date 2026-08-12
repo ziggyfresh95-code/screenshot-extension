@@ -122,6 +122,16 @@ When a user cancels, Stripe sends `customer.subscription.updated` /
 `.deleted`; the webhook flips their row's `status`, and the extension re-gates
 to the paywall once it's no longer `active`.
 
+**Cancellation details captured.** The subscriptions table also stores
+`cancel_at_period_end` (true while a cancel is scheduled but access continues),
+plus the reason the customer gives in the portal — `cancellation_feedback`
+(dropdown), `cancellation_comment` (free text), and `cancellation_reason`. To
+collect the reason at all, enable it in **Stripe → Settings → Billing →
+Customer portal → Cancellations → "Ask for a reason"**. The extension shows a
+banner when a subscription is set to cancel, noting the end date. After
+updating: re-run `stripe_schema.sql` (the `ALTER` adds the new columns to an
+existing table) and redeploy the `stripe-webhook` function.
+
 ### F. Test
 
 1. Reload the extension, sign in → the **paywall** appears.

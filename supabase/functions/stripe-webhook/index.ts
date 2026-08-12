@@ -31,6 +31,21 @@ async function upsert(row: Record<string, unknown>) {
     });
 }
 
+// Map a Stripe subscription to our table columns, including cancellation info.
+function subFields(sub: Stripe.Subscription) {
+  const details = sub.cancellation_details || null;
+  return {
+    stripe_customer_id: sub.customer as string,
+    stripe_subscription_id: sub.id,
+    price_id: sub.items.data[0]?.price.id,
+    current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    cancellation_feedback: details?.feedback ?? null,
+    cancellation_comment: details?.comment ?? null,
+    cancellation_reason: details?.reason ?? null,
+  };
+}
+
 // Resolve our user_id from subscription metadata, or fall back to the customer.
 async function userIdFor(sub: Stripe.Subscription): Promise<string | null> {
   const fromMeta = (sub.metadata?.user_id as string) || null;
@@ -70,13 +85,8 @@ Deno.serve(async (req) => {
           );
           await upsert({
             user_id: userId,
-            stripe_customer_id: s.customer as string,
-            stripe_subscription_id: sub.id,
             status: sub.status,
-            price_id: sub.items.data[0]?.price.id,
-            current_period_end: new Date(
-              sub.current_period_end * 1000
-            ).toISOString(),
+            ...subFields(sub),
           });
         }
         break;
@@ -88,16 +98,11 @@ Deno.serve(async (req) => {
         if (userId) {
           await upsert({
             user_id: userId,
-            stripe_customer_id: sub.customer as string,
-            stripe_subscription_id: sub.id,
             status:
               event.type === 'customer.subscription.deleted'
                 ? 'canceled'
                 : sub.status,
-            price_id: sub.items.data[0]?.price.id,
-            current_period_end: new Date(
-              sub.current_period_end * 1000
-            ).toISOString(),
+            ...subFields(sub),
           });
         }
         break;

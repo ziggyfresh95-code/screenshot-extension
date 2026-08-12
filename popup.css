@@ -226,6 +226,16 @@ select {
   flex-shrink: 0;
 }
 
+.cancel-notice {
+  margin: 0;
+  padding: 8px 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #92400e;
+}
+
 /* ---- Auth UI (shared class names with gallery.css) ---- */
 .auth-root {
   padding: 14px;

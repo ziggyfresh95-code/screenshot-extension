@@ -8,12 +8,17 @@ import {
 } from './lib/storage.js';
 import { getUser, signOut } from './lib/auth.js';
 import { mountAuth } from './lib/authview.js';
-import { isSubscribed, openBillingPortal } from './lib/billing.js';
+import {
+  isSubscribed,
+  getSubscription,
+  openBillingPortal,
+} from './lib/billing.js';
 import { mountPaywall } from './lib/paywall.js';
 
 const els = {
   authRoot: document.getElementById('authRoot'),
   appMain: document.getElementById('appMain'),
+  cancelNotice: document.getElementById('cancelNotice'),
   openGalleryTop: document.getElementById('openGallery'),
   accountEmail: document.getElementById('accountEmail'),
   manageBilling: document.getElementById('manageBillingBtn'),
@@ -232,6 +237,24 @@ async function showApp(user) {
   els.manageBilling.hidden = false;
   els.accountEmail.textContent = user?.email || '';
   await refreshFolders();
+  await showCancelNotice();
+}
+
+// If the subscription is set to cancel at period end, tell the user when access
+// ends (they keep access until then).
+async function showCancelNotice() {
+  try {
+    const sub = await getSubscription();
+    if (sub.cancel_at_period_end && sub.current_period_end) {
+      const ends = new Date(sub.current_period_end).toLocaleDateString();
+      els.cancelNotice.textContent = `Your subscription is set to cancel — access ends ${ends}. Reactivate anytime from Manage billing.`;
+      els.cancelNotice.hidden = false;
+    } else {
+      els.cancelNotice.hidden = true;
+    }
+  } catch (_) {
+    els.cancelNotice.hidden = true;
+  }
 }
 
 async function init() {
