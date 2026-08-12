@@ -333,6 +333,13 @@ body {
   gap: 8px;
 }
 
+.side-foot-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .account-email {
   overflow: hidden;
   text-overflow: ellipsis;

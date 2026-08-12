@@ -12,7 +12,7 @@ import {
 } from './lib/storage.js';
 import { getUser, signOut } from './lib/auth.js';
 import { mountAuth } from './lib/authview.js';
-import { isSubscribed } from './lib/billing.js';
+import { isSubscribed, openBillingPortal } from './lib/billing.js';
 import { mountPaywall } from './lib/paywall.js';
 
 const els = {
@@ -31,6 +31,7 @@ const els = {
   authGate: document.getElementById('authGate'),
   authRoot: document.getElementById('authRoot'),
   accountEmail: document.getElementById('accountEmail'),
+  manageBilling: document.getElementById('manageBillingBtn'),
   signOut: document.getElementById('signOutBtn'),
 };
 
@@ -289,6 +290,14 @@ els.signOut.addEventListener('click', async () => {
   await signOut();
   showSignedOut();
 });
+els.manageBilling.addEventListener('click', async () => {
+  try {
+    const url = await openBillingPortal();
+    chrome.tabs.create({ url });
+  } catch (err) {
+    alert(err.message);
+  }
+});
 
 // If the session is cleared elsewhere (e.g. signed out in the popup), gate.
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -312,6 +321,7 @@ window.addEventListener('focus', () => {
 function showSignedOut() {
   els.authGate.hidden = false;
   els.signOut.hidden = true;
+  els.manageBilling.hidden = true;
   els.accountEmail.textContent = '';
   mountAuth(els.authRoot, afterAuth);
 }
@@ -329,6 +339,7 @@ async function afterAuth() {
   } else {
     els.authGate.hidden = false;
     els.signOut.hidden = true;
+    els.manageBilling.hidden = true;
     els.accountEmail.textContent = '';
     mountPaywall(els.authRoot, {
       user,
@@ -345,6 +356,7 @@ async function showApp(user) {
   els.authGate.hidden = true;
   els.authRoot.innerHTML = '';
   els.signOut.hidden = false;
+  els.manageBilling.hidden = false;
   els.accountEmail.textContent = user?.email || '';
   await selectFolder(null);
 }

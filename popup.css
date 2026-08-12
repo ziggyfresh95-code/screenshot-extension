@@ -219,6 +219,13 @@ select {
   white-space: nowrap;
 }
 
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 /* ---- Auth UI (shared class names with gallery.css) ---- */
 .auth-root {
   padding: 14px;

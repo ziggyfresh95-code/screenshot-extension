@@ -8,7 +8,7 @@ import {
 } from './lib/storage.js';
 import { getUser, signOut } from './lib/auth.js';
 import { mountAuth } from './lib/authview.js';
-import { isSubscribed } from './lib/billing.js';
+import { isSubscribed, openBillingPortal } from './lib/billing.js';
 import { mountPaywall } from './lib/paywall.js';
 
 const els = {
@@ -16,6 +16,7 @@ const els = {
   appMain: document.getElementById('appMain'),
   openGalleryTop: document.getElementById('openGallery'),
   accountEmail: document.getElementById('accountEmail'),
+  manageBilling: document.getElementById('manageBillingBtn'),
   signOut: document.getElementById('signOutBtn'),
   capture: document.getElementById('captureBtn'),
   area: document.getElementById('areaBtn'),
@@ -170,6 +171,16 @@ els.signOut.addEventListener('click', async () => {
   await signOut();
   showSignedOut();
 });
+els.manageBilling.addEventListener('click', async () => {
+  setStatus('Opening billing…');
+  try {
+    const url = await openBillingPortal();
+    chrome.tabs.create({ url });
+    setStatus('');
+  } catch (err) {
+    setStatus(err.message, 'error');
+  }
+});
 
 // ---- gate: signed out -> auth, signed in but unpaid -> paywall, else app ----
 
@@ -177,6 +188,7 @@ function showSignedOut() {
   els.appMain.hidden = true;
   els.openGalleryTop.hidden = true;
   els.signOut.hidden = true;
+  els.manageBilling.hidden = true;
   els.accountEmail.textContent = '';
   els.authRoot.hidden = false;
   mountAuth(els.authRoot, afterAuth);
@@ -196,6 +208,7 @@ async function afterAuth() {
     await showApp(user);
   } else {
     els.signOut.hidden = true;
+    els.manageBilling.hidden = true;
     els.openGalleryTop.hidden = true;
     els.accountEmail.textContent = '';
     els.authRoot.hidden = false;
@@ -216,6 +229,7 @@ async function showApp(user) {
   els.appMain.hidden = false;
   els.openGalleryTop.hidden = false;
   els.signOut.hidden = false;
+  els.manageBilling.hidden = false;
   els.accountEmail.textContent = user?.email || '';
   await refreshFolders();
 }

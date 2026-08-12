@@ -106,7 +106,23 @@ supabase secrets set STRIPE_PRICE_ID=price_xxx
    supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
    ```
 
-### E. Test
+### E. Cancel / manage subscription (Customer Portal)
+
+Signed-in subscribers get a **Manage billing** button (popup footer and gallery
+sidebar) that opens Stripe's hosted Customer Portal to cancel or update payment.
+
+1. Deploy the third function: `supabase/functions/create-portal-session`
+   (keep **Verify JWT ON**). It reuses `STRIPE_SECRET_KEY` — no new secret.
+2. One-time: activate the portal in test mode at
+   **Stripe → Settings → Billing → Customer portal**
+   (https://dashboard.stripe.com/test/settings/billing/portal) and enable
+   **"Cancel subscriptions"**. Save.
+
+When a user cancels, Stripe sends `customer.subscription.updated` /
+`.deleted`; the webhook flips their row's `status`, and the extension re-gates
+to the paywall once it's no longer `active`.
+
+### F. Test
 
 1. Reload the extension, sign in → the **paywall** appears.
 2. **Subscribe with Stripe** → pay on the Stripe page with test card
